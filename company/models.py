@@ -2,6 +2,13 @@
 import csv
 from django.db import models
 
+USD = 'D'
+RMB = 'R'
+PAYMENT = (
+	(USD, 'US$'),
+	(RMB, 'RMB'),
+)
+
 class Address(models.Model):
 	"""docstring for Address"""
 	""" Address """
@@ -105,15 +112,10 @@ class Product(models.Model):
 class CompanyProduct(models.Model):
 	"""docstring for CompanyProduct"""
 	""" 설명 """
-	USD = 'D'
-	RMB = 'R'
-	CATEGORY = (
-		(USD, 'US$'),
-		(RMB, 'RMB'),
-	)
+
 	company = models.ForeignKey(Company)
 	product = models.ForeignKey(Product)
-	currency = models.CharField(max_length=1,choices=CATEGORY, default=RMB)
+	currency = models.CharField(max_length=1,choices=PAYMENT, default=RMB)
 	price = models.FloatField(null=True, blank=True)
 	exchange_rate = models.FloatField(null=True, blank=True)
 	rmb_price = models.FloatField(null=True, blank=True)
@@ -129,14 +131,62 @@ class Customer(models.Model):
 	""" 설명 """
 	en_name = models.CharField(max_length=30, verbose_name='영문이름')
 	address = models.CharField(max_length=200)
-	tel = models.CharField(max_length=200)
-	fax = models.CharField(max_length=200)
-	email = models.CharField(max_length=200)
+	tel = models.CharField(max_length=20, null=True, blank=True)
+	fax = models.CharField(max_length=20, null=True, blank=True)
+	email = models.CharField(max_length=50, null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return self.en_name
 
 
-	# def get_absolute_url(self):
-	# 	return reverse('myapp:post_detail', args=[self.id])
+class SalesContract(models.Model):
+	"""docstring for SalesContract"""
+	""" 설명 """
+	name = models.CharField(max_length=30)
+	customer = models.ForeignKey(Customer)
+	product = models.ForeignKey(Product)
+	sales_amount = models.IntegerField()
+	unitprice = models.FloatField()
+	currency = models.CharField(max_length=1,choices=PAYMENT, default=USD)
+	packaging = models.CharField(max_length=100)
+
+	portofloading = models.CharField(max_length=100, verbose_name='선적항구')
+	portofdestination = models.CharField(max_length=100, verbose_name='도착항구')
+
+	devliveryrequest = models.CharField(max_length=50, null=True, blank=True,
+						verbose_name='기타요구사항')
+
+	shipping_at = models.DateField(verbose_name='선적일자')
+	actualshipping_at = models.DateField(verbose_name='실제선적일자',
+						null=True, blank=True)
+	contracted_at = models.DateField(verbose_name='계약일자')
+
+	def __str__(self):
+		return self.name
+
+class PurchaseContract(models.Model):
+	"""docstring for SalesContract"""
+	""" 설명 """
+	name = models.CharField(max_length=30)
+	company = models.ForeignKey(Company)
+	product = models.ForeignKey(Product)
+	sales_amount = models.IntegerField()
+	unitprice = models.FloatField()
+	currency = models.CharField(max_length=1,choices=PAYMENT, default=RMB)
+	packaging = models.CharField(max_length=100)
+
+	portofdestination = models.CharField(max_length=100, verbose_name='도착항구')
+
+	shipping_at = models.DateField(verbose_name='출발일자')
+	actualshipping_at = models.DateField(verbose_name='실제출발일자',
+						null=True, blank=True)
+
+	predictdelivery_at = models.DateField(verbose_name='도착예정일자')
+	actualdelivery_at = models.DateField(verbose_name='실제도착일자',
+						null=True, blank=True)
+
+	contracted_at = models.DateField(verbose_name='계약일자')
+
+	def __str__(self):
+		return self.name

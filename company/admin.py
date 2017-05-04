@@ -1,7 +1,7 @@
 # company/admin.py
 from django.contrib import admin
 from .models import Factory, Company, Address
-from .models import Product, CompanyProduct, Customer
+from .models import Product, CompanyProduct, Customer, SalesContract
 
 
 
@@ -39,4 +39,9 @@ class CustomerAdmin(admin.ModelAdmin):
 		model = Customer
 	list_display = ['en_name', ]
 
+@admin.register(SalesContract)
+class SalesContractAdmin(admin.ModelAdmin):
+	class Meta:
+		model = SalesContract
+	list_display = ['name', 'customer', 'product', 'sales_amount', 'unitprice']
 
