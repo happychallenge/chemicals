@@ -1,7 +1,7 @@
 # company/admin.py
 from django.contrib import admin
 from .models import Factory, Company, Address
-from .models import Product, CompanyProduct
+from .models import Product, CompanyProduct, Customer
 
 
 
@@ -26,8 +26,6 @@ class AddressAdmin(admin.ModelAdmin):
 	list_display = ['large', 'middle', 'small', 'created_at']
 	list_per_page = 1000
 
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
 	class Meta:
@@ -35,5 +33,10 @@ class ProductAdmin(admin.ModelAdmin):
 	list_display = ['en_name', 'cn_name', 'casno', 'hscode']
 	inlines = [ CompanyProductInline ]
 
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+	class Meta:
+		model = Customer
+	list_display = ['en_name', ]
 
 

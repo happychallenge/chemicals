@@ -52,6 +52,8 @@ class Company(models.Model):
 	homepage = models.URLField(max_length=100, blank=True, null=True)
 	location = models.ForeignKey(Address, blank=True, null=True)
 	contact = models.CharField(max_length=50, blank=True, null=True)
+	tel = models.CharField(max_length=50, blank=True, null=True)
+	fax = models.CharField(max_length=50, blank=True, null=True)
 	email = models.EmailField(max_length=50, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
@@ -85,6 +87,12 @@ class Product(models.Model):
 	atomic_amount = models.FloatField(verbose_name='분자량')
 	image = models.ImageField(verbose_name='구조식', upload_to="chemical/")
 	usage = models.TextField(verbose_name='용도', null=True, blank=True)
+	including = models.CharField(max_length=1000, null=True, blank=True,
+					verbose_name='成分含量')
+	appearance1 = models.CharField(max_length=1000, null=True, blank=True,
+					verbose_name='乌洛托品请注明外观')
+	appearance2 = models.CharField(max_length=1000, null=True, blank=True,
+					verbose_name='6-己内酰胺请注明外观')
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
@@ -106,12 +114,28 @@ class CompanyProduct(models.Model):
 	company = models.ForeignKey(Company)
 	product = models.ForeignKey(Product)
 	currency = models.CharField(max_length=1,choices=CATEGORY, default=RMB)
-	price = models.FloatField()
+	price = models.FloatField(null=True, blank=True)
+	exchange_rate = models.FloatField(null=True, blank=True)
+	rmb_price = models.FloatField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
 		return '{} {}'.format(self.company, self.product)
+
+
+class Customer(models.Model):
+	"""docstring for Customer"""
+	""" 설명 """
+	en_name = models.CharField(max_length=30, verbose_name='영문이름')
+	address = models.CharField(max_length=200)
+	tel = models.CharField(max_length=200)
+	fax = models.CharField(max_length=200)
+	email = models.CharField(max_length=200)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return self.en_name
 
 
 	# def get_absolute_url(self):
