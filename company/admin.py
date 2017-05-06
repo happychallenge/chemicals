@@ -1,8 +1,8 @@
 # company/admin.py
 from django.contrib import admin
 from .models import Factory, Company, Address
-from .models import Product, CompanyProduct, Customer, SalesContract
-
+from .models import Product, CompanyProduct, Customer
+from .models import SalesContract, PurchaseContract, AllProcess
 
 
 class FactoryInline(admin.TabularInline):
@@ -39,9 +39,18 @@ class CustomerAdmin(admin.ModelAdmin):
 		model = Customer
 	list_display = ['en_name', ]
 
+class PurchaseContractInline(admin.StackedInline):
+    model = PurchaseContract
+    extra = 1
+
+class AllProcessInline(admin.StackedInline):
+    model = AllProcess
+    extra = 1
+
 @admin.register(SalesContract)
 class SalesContractAdmin(admin.ModelAdmin):
 	class Meta:
 		model = SalesContract
 	list_display = ['name', 'customer', 'product', 'sales_amount', 'unitprice']
+	inlines = [ PurchaseContractInline, AllProcessInline ]
 

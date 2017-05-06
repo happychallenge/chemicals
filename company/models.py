@@ -161,6 +161,7 @@ class SalesContract(models.Model):
 	actualshipping_at = models.DateField(verbose_name='실제선적일자',
 						null=True, blank=True)
 	contracted_at = models.DateField(verbose_name='계약일자')
+	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return self.name
@@ -169,6 +170,7 @@ class PurchaseContract(models.Model):
 	"""docstring for SalesContract"""
 	""" 설명 """
 	name = models.CharField(max_length=30)
+	salescontract = models.ForeignKey(SalesContract,null=True, blank=True)
 	company = models.ForeignKey(Company)
 	product = models.ForeignKey(Product)
 	sales_amount = models.IntegerField()
@@ -187,6 +189,85 @@ class PurchaseContract(models.Model):
 						null=True, blank=True)
 
 	contracted_at = models.DateField(verbose_name='계약일자')
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return self.name
+
+
+class AllProcess(models.Model):
+	"""docstring for AllProcess"""
+	""" 설명 """
+	name = models.CharField(max_length=30)
+
+	# 我 《== ==》 客户（GP）
+	sales_contract = models.ForeignKey(SalesContract)
+	sales_filename = models.CharField(verbose_name='销售合同名字', max_length=50)
+	send_sales_contrat = models.BooleanField(default=False, verbose_name='传送销售合同')
+
+	# 我 《== ==》 供应商
+	make_purchase_contract = models.BooleanField(default=False, verbose_name='确认购买合同')
+	purchase_filename = models.CharField(verbose_name='购买合同名字', max_length=50, null=True, blank=True)
+	send_purchase_contrat = models.BooleanField(default=False)
+
+	# 我 ==》 供应商
+	send_purchase_money = models.BooleanField(default=False, verbose_name='购买付款')
+
+	# 客户 ==》 我 ==》 供应商
+	confirm_packing_marking = models.BooleanField(default=False, verbose_name='传送包装和Marking')
+
+	# 我 ==》 物流公司
+	make_commercial_invoice = models.BooleanField(default=False, verbose_name='做好 Invoice&Packing List')
+	commercial_invoice_filename = models.CharField(verbose_name='Invoice 文档名字', max_length=50, null=True, blank=True)
+	send_commercial_invoice = models.BooleanField(default=False, verbose_name='传送 Invoice')
+
+	# 物流公司 ==》 我 ==》 供应商
+	received_warehouse_confirm = models.BooleanField(default=False, verbose_name='从物流公司收到进仓单')
+	send_warehouse_confirm_provider = models.BooleanField(default=False, verbose_name='向供应商提供进仓单')
+
+	# 我 ==》 物流公司 
+	make_material = models.BooleanField(default=False, verbose_name='准备 非危险品证明书 产品说明书 MSDS')
+	not_danger_doc_filename = models.CharField(verbose_name='非危险品证明书文档', max_length=50, null=True, blank=True)
+	product_explain_filename = models.CharField(verbose_name='产品说明书文档', max_length=50, null=True, blank=True)
+	MSDS_filename = models.CharField(verbose_name='MSDS文档', max_length=50, null=True, blank=True)
+	send_MSDS = models.BooleanField(default=False, verbose_name='传送MSDS文档')
+	send_material = models.BooleanField(default=False, verbose_name='传送 非危险品证明书 产品说明书 MSDS')
+
+	# 供应商 ==》 我 ==》 物流公司
+	pallet_cbm = models.CharField(verbose_name='包装后托盘和CBM', max_length=100, null=True, blank=True)
+	send_pallet_cbm = models.BooleanField(default=False, verbose_name='传送包装后托盘和CBM信息')
+
+	# 供应商 ==》 我 ==》 客户
+	picture_of_packing1 = models.FileField(verbose_name='包装后照片1', max_length=50, null=True, blank=True)
+	picture_of_packing2 = models.FileField(verbose_name='包装后照片2', max_length=50, null=True, blank=True)
+	picture_of_packing3 = models.FileField(verbose_name='包装后照片3', max_length=50, null=True, blank=True)
+	CoA_filename = models.CharField(verbose_name='CoA', max_length=50, null=True, blank=True)
+	send_pictures_CoA = models.BooleanField(default=False, verbose_name='传送照片和CoA')
+
+	# 物流公司 ==》 我 ==》 物流公司
+	send_baoguandan = models.BooleanField(default=False, verbose_name='寄过去报关单')
+	send_postcode_number = models.BooleanField(default=False, verbose_name='传送顺丰的号码')
+	
+	# 我 ==》 供应商
+	send_product_name = models.BooleanField(default=False, verbose_name='为了发票传送报关单上的产品名字')
+
+	# 物流公司 ==》 我 ==》 客户（GP）
+	received_bill_of_lading = models.BooleanField(default=False, verbose_name='从物流公司收到B/L')
+	send_bill_of_lading = models.BooleanField(default=False, verbose_name='向客户提供B/L')
+
+	# 我 ==》 客户（GP）
+	make_FTF_original = models.FileField(verbose_name='原产地证明', max_length=50, null=True, blank=True)
+	send_file_for_confirm = models.BooleanField(default=False, verbose_name='为了证明传送文档')
+	send_result_file = models.BooleanField(default=False, verbose_name='传送证明书')
+
+	# 我 ==》 海关
+	apply_tax_refund = models.DateField(null=True, blank=True, verbose_name='申请退税')
+	get_tax_refund = models.DateField(null=True, blank=True, verbose_name='退税日子')
+
+	all_cleared  = models.BooleanField(default=False, verbose_name='项目结束')
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
 		return self.name
