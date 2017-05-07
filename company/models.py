@@ -5,7 +5,7 @@ from django.db import models
 USD = 'D'
 RMB = 'R'
 PAYMENT = (
-	(USD, 'US$'),
+	(USD, 'USD'),
 	(RMB, 'RMB'),
 )
 
@@ -23,6 +23,15 @@ class Address(models.Model):
 
 	def __str__(self):
 		return '{} {}'.format(self.large, self.middle)
+
+class ExchangeRate(models.Model):
+	""" docstring for ExchangeRate"""
+	exchange_rate = models.FloatField()
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return '{} of {}/{}/{}'.format(self.exchange_rate, created_at.year, created_at.month, created_at.day)
+
 
 def read_region_data():
 	with open('china_city.csv', 'r') as file:
@@ -48,14 +57,14 @@ class Company(models.Model):
 	PRODUCTION = 'P'
 	MIX = 'M'
 	CATEGORY = (
-		(TRADE, '무역'),
-		(PRODUCTION, '생산'),
-		(MIX, '생산무역겸임'),
+		(TRADE, '贸易'),
+		(PRODUCTION, '生产'),
+		(MIX, '生产&贸易'),
 	)
-	name = models.CharField(max_length=30, verbose_name='중문이름')
-	en_name = models.CharField(max_length=50, verbose_name='영문이름')
+	name = models.CharField(max_length=30, verbose_name='中文名字')
+	en_name = models.CharField(max_length=50, verbose_name='English Name')
 	category = models.CharField(max_length=1, choices=CATEGORY, 
-					default=PRODUCTION, verbose_name='생산여부')
+					default=PRODUCTION, verbose_name='公司种类')
 	homepage = models.URLField(max_length=100, blank=True, null=True)
 	location = models.ForeignKey(Address, blank=True, null=True)
 	contact = models.CharField(max_length=50, blank=True, null=True)
@@ -86,14 +95,14 @@ class Factory(models.Model):
 class Product(models.Model):
 	"""docstring for Product"""
 	""" Product """
-	en_name = models.CharField(max_length=30, verbose_name='영문이름')
-	cn_name = models.CharField(max_length=50, verbose_name='중문이름')
+	en_name = models.CharField(max_length=30, verbose_name='English Name')
+	cn_name = models.CharField(max_length=50, verbose_name='中文名字')
 	casno = models.CharField(max_length=30, verbose_name='CAS No.')
 	hscode = models.CharField(max_length=30, verbose_name='HS CODE')
 	chemical_atomic = models.CharField(max_length=50, verbose_name='화학식')
-	atomic_amount = models.FloatField(verbose_name='분자량')
-	image = models.ImageField(verbose_name='구조식', upload_to="chemical/")
-	usage = models.TextField(verbose_name='용도', null=True, blank=True)
+	atomic_amount = models.FloatField(verbose_name='分子量')
+	image = models.ImageField(verbose_name='结构式', upload_to="chemical/")
+	usage = models.TextField(verbose_name='用途', null=True, blank=True)
 	including = models.CharField(max_length=1000, null=True, blank=True,
 					verbose_name='成分含量')
 	appearance1 = models.CharField(max_length=1000, null=True, blank=True,
@@ -104,9 +113,6 @@ class Product(models.Model):
 
 	def __str__(self):
 		return self.en_name
-
-	# def get_absolute_url(self):
-	# 	return reverse('company:post_detail', args=[self.id])
 
 
 class CompanyProduct(models.Model):
@@ -129,7 +135,7 @@ class CompanyProduct(models.Model):
 class Customer(models.Model):
 	"""docstring for Customer"""
 	""" 설명 """
-	en_name = models.CharField(max_length=30, verbose_name='영문이름')
+	en_name = models.CharField(max_length=30, verbose_name='English Name')
 	address = models.CharField(max_length=200)
 	tel = models.CharField(max_length=20, null=True, blank=True)
 	fax = models.CharField(max_length=20, null=True, blank=True)
@@ -151,16 +157,16 @@ class SalesContract(models.Model):
 	currency = models.CharField(max_length=1,choices=PAYMENT, default=USD)
 	packaging = models.CharField(max_length=100)
 
-	portofloading = models.CharField(max_length=100, verbose_name='선적항구')
-	portofdestination = models.CharField(max_length=100, verbose_name='도착항구')
+	portofloading = models.CharField(max_length=100, verbose_name='Shipping 港口')
+	portofdestination = models.CharField(max_length=100, verbose_name='目的地 港口')
 
 	devliveryrequest = models.CharField(max_length=50, null=True, blank=True,
-						verbose_name='기타요구사항')
+						verbose_name='其他')
 
-	shipping_at = models.DateField(verbose_name='선적일자')
-	actualshipping_at = models.DateField(verbose_name='실제선적일자',
+	shipping_at = models.DateField(verbose_name='Shipping 计划日子')
+	actualshipping_at = models.DateField(verbose_name='实际 Shipping 日子',
 						null=True, blank=True)
-	contracted_at = models.DateField(verbose_name='계약일자')
+	contracted_at = models.DateField(verbose_name='合同日子')
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
@@ -178,17 +184,17 @@ class PurchaseContract(models.Model):
 	currency = models.CharField(max_length=1,choices=PAYMENT, default=RMB)
 	packaging = models.CharField(max_length=100)
 
-	portofdestination = models.CharField(max_length=100, verbose_name='도착항구')
+	portofdestination = models.CharField(max_length=100, verbose_name='货到的港口')
 
-	shipping_at = models.DateField(verbose_name='출발일자')
-	actualshipping_at = models.DateField(verbose_name='실제출발일자',
+	shipping_at = models.DateField(verbose_name='出发计划日子')
+	actualshipping_at = models.DateField(verbose_name='实际出发日子',
 						null=True, blank=True)
 
-	predictdelivery_at = models.DateField(verbose_name='도착예정일자')
-	actualdelivery_at = models.DateField(verbose_name='실제도착일자',
+	predictdelivery_at = models.DateField(verbose_name='到达计划日子')
+	actualdelivery_at = models.DateField(verbose_name='实际到达日子',
 						null=True, blank=True)
 
-	contracted_at = models.DateField(verbose_name='계약일자')
+	contracted_at = models.DateField(verbose_name='合同日子')
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
@@ -230,7 +236,6 @@ class AllProcess(models.Model):
 	not_danger_doc_filename = models.CharField(verbose_name='非危险品证明书文档', max_length=50, null=True, blank=True)
 	product_explain_filename = models.CharField(verbose_name='产品说明书文档', max_length=50, null=True, blank=True)
 	MSDS_filename = models.CharField(verbose_name='MSDS文档', max_length=50, null=True, blank=True)
-	send_MSDS = models.BooleanField(default=False, verbose_name='传送MSDS文档')
 	send_material = models.BooleanField(default=False, verbose_name='传送 非危险品证明书 产品说明书 MSDS')
 
 	# 供应商 ==》 我 ==》 物流公司
